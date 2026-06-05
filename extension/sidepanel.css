@@ -1,7 +1,15 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
+    min-width: 380px;
     margin: 0;
     padding: 15px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: white;
+    color: black;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .container {
@@ -10,16 +18,32 @@ body {
     gap: 20px;
 }
 
-.header {
+/* HEADER */
+.head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
 }
 
-.header h2 {
-    margin: 0px;
+.head h2 {
+    margin: 0;
     color: #1a73e8;
 }
 
+.title-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.tagline {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #666;
+}
+
+/* BUTTONS */
 .actions {
     display: flex;
     gap: 10px;
@@ -33,12 +57,14 @@ button {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: 0.2s;
 }
 
 button:hover {
     background-color: #1557b0;
 }
 
+/* TEXTAREA */
 .notes textarea {
     width: 100%;
     height: 200px;
@@ -47,8 +73,11 @@ button:hover {
     border-radius: 4px;
     resize: vertical;
     margin-bottom: 10px;
+    background: white;
+    color: black;
 }
 
+/* RESULTS */
 #results {
     padding: 10px;
     background-color: #f8f9fa;
@@ -67,4 +96,88 @@ button:hover {
 .result-content {
     margin-bottom: 10px;
     line-height: 1.5;
+}
+
+/* ========================= */
+/* DARK MODE */
+/* ========================= */
+
+body.dark-mode {
+    background-color: #121212;
+    color: #f1f1f1;
+}
+
+body.dark-mode .head {
+    border-bottom: 1px solid #333;
+}
+
+body.dark-mode .tagline {
+    color: #b0b0b0;
+}
+
+body.dark-mode .notes textarea {
+    background-color: #1e1e1e;
+    color: white;
+    border: 1px solid #444;
+}
+
+body.dark-mode #results {
+    background-color: #1e1e1e;
+}
+
+body.dark-mode .result-item {
+    background-color: #2a2a2a;
+    box-shadow: none;
+}
+
+body.dark-mode button {
+    background-color: #333;
+}
+
+body.dark-mode button:hover {
+    background-color: #444;
+}
+
+/* Theme Toggle Tooltip */
+
+.theme-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: #333;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+}
+
+.theme-wrapper:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+#themeToggle {
+    flex-shrink: 0;
+    font-size: 18px;
+
+    width: 30px;
+    height: 30px;
+    border-radius: 10%;
+    padding: 0;
+
+    transition: transform 0.2s ease;
+}
+
+#themeToggle:hover {
+    transform: scale(1.1);
 }

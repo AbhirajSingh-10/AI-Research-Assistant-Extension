@@ -1,6 +1,6 @@
 {
-  "name": "Research Assistant",
-  "description": "AI powered research assistant",
+  "name": "ResearchFlow",
+  "description": "AI Powered Research Assistant.",
   "version": "1.0",
   "manifest_version": 3,
   "permissions":[
@@ -11,7 +11,7 @@
 
   ],
   "action": {
-    "default_title": "Research Assistant",
+    "default_title": "ResearchFlow",
     "default_icon": "idea.png"
   },
 

@@ -1,3 +1,4 @@
+let themeToggle;
 document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['researchNotes'], function(result) {
        if (result.researchNotes) {
@@ -7,7 +8,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('summarizeBtn').addEventListener('click', summarizeText);
     document.getElementById('saveNotesBtn').addEventListener('click', saveNotes);
+
+    initializeTheme();
 });
+
+function initializeTheme(){
+    themeToggle = document.getElementById("themeToggle");
+
+    const tooltip = document.querySelector(".tooltip");
+
+    if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+    }
+
+    updateThemeButton();
+
+    // Toggle theme
+    themeToggle.addEventListener("click", () => {
+
+        document.body.classList.toggle("dark-mode");
+
+        if (document.body.classList.contains("dark-mode")) {
+            localStorage.setItem("theme", "dark");
+        } else {
+            localStorage.setItem("theme", "light");
+        }
+
+        updateThemeButton();
+    });
+}
 
 
 async function summarizeText() {
@@ -18,7 +47,7 @@ async function summarizeText() {
             function: () => window.getSelection().toString()
         });
 
-        if (!result) {
+        if (!result || !result.trim()) {
             showResult('Please select some text first');
             return;
         }
@@ -52,4 +81,16 @@ async function saveNotes() {
 
 function showResult(content) {
     document.getElementById('results').innerHTML = `<div class="result-item"><div class="result-content">${content}</div></div>`;
+}
+
+function updateThemeButton() {
+    const tooltip = document.querySelector(".tooltip");
+    
+    if (document.body.classList.contains("dark-mode")) {
+        themeToggle.textContent = "☀️";
+        tooltip.textContent = "Switch to Light Mode";
+    } else {
+        themeToggle.textContent = "🌙";
+        tooltip.textContent = "Switch to Dark Mode";
+    }
 }

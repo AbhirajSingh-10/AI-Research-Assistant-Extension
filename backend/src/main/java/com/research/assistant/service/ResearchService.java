@@ -68,7 +68,7 @@ public class ResearchService {
         StringBuilder prompt = new StringBuilder();
 
         switch(request.getOperation()){
-            case Operations.SUMMARIZE -> prompt.append("Provide a clear and concise summary of the following text in a few sentences :\n\n");
+            case Operations.SUMMARIZE -> prompt.append("Provide a clear and concise summary of the following text in a few bullet points :\n\n");
             case Operations.SUGGEST -> prompt.append("Based on the following content: suggest related topics and further readings. Format the response with clear headings and bullet points:\n\n");
             default -> throw new IllegalArgumentException("Unknown Operation :"+request.getOperation());
         }
