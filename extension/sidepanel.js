@@ -1,13 +1,22 @@
 let themeToggle;
+
+
 document.addEventListener('DOMContentLoaded', () => {
+
     chrome.storage.local.get(['researchNotes'], function(result) {
-       if (result.researchNotes) {
-        document.getElementById('notes').value = result.researchNotes;
-       } 
+        const notesElement = document.getElementById('notes');
+        if (notesElement && result.researchNotes) {
+            notesElement.value = result.researchNotes;
+        } 
     });
 
-    document.getElementById('summarizeBtn').addEventListener('click', summarizeText);
-    document.getElementById('saveNotesBtn').addEventListener('click', saveNotes);
+
+    document.getElementById('summarizeBtn')?.addEventListener('click', () => processSelection('SUMMARIZE'));
+    document.getElementById('explainBtn')?.addEventListener('click', () => processSelection('EXPLAIN'));
+    document.getElementById('suggestBtn')?.addEventListener('click', () => processSelection('SUGGEST'));
+    document.getElementById('keyPointsBtn')?.addEventListener('click', () => processSelection('KEY_POINTS'));
+    document.getElementById('notesBtn')?.addEventListener('click', () => processSelection('GENERATE_NOTES'));
+    document.getElementById('saveNotesBtn')?.addEventListener('click', saveNotes);
 
     initializeTheme();
 });
@@ -38,35 +47,55 @@ function initializeTheme(){
     });
 }
 
+async function processSelection(operation) {
 
-async function summarizeText() {
     try {
-        const [tab] = await chrome.tabs.query({ active:true, currentWindow: true});
-        const [{ result }] = await chrome.scripting.executeScript({
-            target: {tabId: tab.id},
-            function: () => window.getSelection().toString()
+
+        const [tab] = await chrome.tabs.query({
+            active: true,
+            currentWindow: true
         });
+
+        const [{ result }] =
+            await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: () => window.getSelection().toString()
+            });
 
         if (!result || !result.trim()) {
             showResult('Please select some text first');
             return;
         }
 
-        const response = await fetch('http://localhost:8080/api/research/process', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: result, operation: 'SUMMARIZE'})
-        });
+        showResult('Processing...');
+
+        const response = await fetch(
+            'http://localhost:8080/api/research/process',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: result,
+                    operation: operation
+                })
+            }
+        );
 
         if (!response.ok) {
             throw new Error(`API Error: ${response.status}`);
         }
 
         const text = await response.text();
-        showResult(text.replace(/\n/g,'<br>'));
+
+        showResult(text.replace(/\n/g, '<br>'));
 
     } catch (error) {
-        showResult('Error: ' + error.message);
+
+        showResult(
+            'Error: ' + error.message
+        );
     }
 }
 
