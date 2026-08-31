@@ -3,6 +3,7 @@ package com.research.assistant.youtube.controller;
 import com.research.assistant.youtube.dto.TranscriptResponse;
 import com.research.assistant.youtube.dto.YoutubeRequest;
 import com.research.assistant.youtube.service.YouTubeService;
+import com.research.assistant.youtube.service.YoutubeRagService;
 import io.github.thoroldvix.api.TranscriptRetrievalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class YoutubeController {
 
     private final YouTubeService youTubeService;
+    private final YoutubeRagService youtubeRagService;
 
     @PostMapping("/transcript")
     public ResponseEntity<TranscriptResponse> getTranscript(
@@ -26,6 +28,18 @@ public class YoutubeController {
         TranscriptResponse response = youTubeService.getTranscript(request.url());
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/index")
+    public ResponseEntity<String> indexTranscript(
+            @RequestBody YoutubeRequest request
+    ) throws TranscriptRetrievalException{
+
+        TranscriptResponse response = youTubeService.getTranscript(request.url());
+
+        youtubeRagService.storeTranscripts(response);
+
+        return ResponseEntity.ok("Youtube transcript indexed successfully");
     }
 
 }
