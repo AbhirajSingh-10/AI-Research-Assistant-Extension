@@ -2,6 +2,7 @@ package com.research.assistant.youtube.service;
 
 import com.research.assistant.youtube.dto.TranscriptResponse;
 import com.research.assistant.youtube.dto.TranscriptSegment;
+import com.research.assistant.youtube.dto.YoutubeAnswerResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.Document;
@@ -92,7 +93,7 @@ public class YoutubeRagService {
         }
     }
 
-    public String askQuestion(String videoId, String question){
+    public YoutubeAnswerResponse askQuestion(String videoId, String question){
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(question)
                 .topK(5)
@@ -103,7 +104,10 @@ public class YoutubeRagService {
         List<Document> documents = vectorStore.similaritySearch(searchRequest);
 
         if(documents==null || documents.isEmpty()){
-            return "I couldn't find any relevant information in these video.";
+            return new YoutubeAnswerResponse(
+                    "I couldn't find any relevant information in these video.",
+                    List.of()
+            );
         }
 
 
@@ -126,7 +130,19 @@ public class YoutubeRagService {
                 %s
                 """.formatted(context, question);
 
-        return chatModel.call(prompt);
+        String answer = chatModel.call(prompt);
+
+        List<YoutubeAnswerResponse.Source> sources =
+                documents.stream()
+                        .map(document ->
+                                new YoutubeAnswerResponse.Source(
+                                    ((Number) document.getMetadata().get("start")).doubleValue(),
+                                    ((Number) document.getMetadata().get("duration")).doubleValue(),
+                                        document.getText()
+                                )
+                        ).toList();
+
+        return new YoutubeAnswerResponse(answer,sources);
     }
 
     private Document createDocument(
