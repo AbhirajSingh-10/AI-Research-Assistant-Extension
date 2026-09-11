@@ -2,10 +2,8 @@ package com.research.assistant.youtube.service;
 
 import com.research.assistant.youtube.dto.TranscriptResponse;
 import com.research.assistant.youtube.dto.TranscriptSegment;
-import com.research.assistant.youtube.dto.YoutubeQuestionRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -13,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -110,10 +109,7 @@ public class YoutubeRagService {
 
         String context = documents.stream()
                 .map(Document::getText)
-                .reduce(
-                        "",
-                        (a,b)->a+"\n\n"+b
-                );
+                .collect(Collectors.joining("\n\n"));
 
         String prompt = """
                 You are answering questions about a YouTube video.
