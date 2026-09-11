@@ -2,11 +2,16 @@ package com.research.assistant.youtube.service;
 
 import com.research.assistant.youtube.dto.TranscriptResponse;
 import com.research.assistant.youtube.dto.TranscriptSegment;
+import com.research.assistant.youtube.dto.YoutubeQuestionRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,27 +19,133 @@ import java.util.List;
 public class YoutubeRagService {
 
     private final VectorStore vectorStore;
+    private final ChatModel chatModel;
 
-    public void storeTranscripts(TranscriptResponse response){
-        List<Document> documents = response.transcript()
-                .stream()
-                .map(segment -> createDocument(response.videoId(),segment))
-                .toList();
+    public void storeTranscripts(TranscriptResponse response) {
 
-        vectorStore.add(documents);
+        List<TranscriptSegment> segments =
+                response.transcript();
+
+        List<Document> documents =
+                new ArrayList<>();
+
+        StringBuilder chunkText =
+                new StringBuilder();
+
+        double chunkStart = 0;
+        double chunkDuration = 0;
+
+        int segmentCount = 0;
+
+        for (TranscriptSegment segment : segments) {
+
+            if (segmentCount == 0) {
+                chunkStart = segment.start();
+            }
+
+            chunkText.append(segment.text())
+                    .append(" ");
+
+            chunkDuration += segment.duration();
+            segmentCount++;
+
+            if (segmentCount == 10) {
+
+                documents.add(
+                        createDocument(
+                                response.videoId(),
+                                chunkText.toString(),
+                                chunkStart,
+                                chunkDuration
+                        )
+                );
+
+                chunkText.setLength(0);
+                chunkDuration = 0;
+                segmentCount = 0;
+            }
+        }
+
+        if (segmentCount > 0) {
+
+            documents.add(
+                    createDocument(
+                            response.videoId(),
+                            chunkText.toString(),
+                            chunkStart,
+                            chunkDuration
+                    )
+            );
+        }
+        int batchSize = 100;
+
+        for (int i = 0; i < documents.size(); i += batchSize) {
+
+            int end = Math.min(
+                    i + batchSize,
+                    documents.size()
+            );
+
+            List<Document> batch =
+                    documents.subList(i, end);
+
+            vectorStore.add(batch);
+        }
     }
 
-    private Document createDocument(String videoId, TranscriptSegment segment) {
+    public String askQuestion(String videoId, String question){
+        SearchRequest searchRequest = SearchRequest.builder()
+                .query(question)
+                .topK(5)
+                .similarityThreshold(0.5)
+                .filterExpression("videoId == '"+videoId+"'")
+                .build();
 
-        String content = segment.text();
+        List<Document> documents = vectorStore.similaritySearch(searchRequest);
+
+        if(documents==null || documents.isEmpty()){
+            return "I couldn't find any relevant information in these video.";
+        }
+
+
+        String context = documents.stream()
+                .map(Document::getText)
+                .reduce(
+                        "",
+                        (a,b)->a+"\n\n"+b
+                );
+
+        String prompt = """
+                You are answering questions about a YouTube video.
+                
+                Use ONLY the transcript context provided below.
+    
+                If the answer cannot be found in the transcript,
+                say that the information is not available in the video.
+    
+                Transcript context:
+                %s
+    
+                Question:
+                %s
+                """.formatted(context, question);
+
+        return chatModel.call(prompt);
+    }
+
+    private Document createDocument(
+            String videoId,
+            String text,
+            double start,
+            double duration
+    ) {
 
         return Document.builder()
-                .text(content)
+                .text(text.trim())
                 .metadata("videoId", videoId)
-                .metadata("start",segment.start())
-                .metadata("duration",segment.duration())
+                .metadata("source", "youtube")
+                .metadata("start", start)
+                .metadata("duration", duration)
                 .build();
     }
-
-
 }

@@ -39,7 +39,7 @@ public class YoutubeController {
 
         youtubeRagService.storeTranscripts(response);
 
-        return ResponseEntity.ok("Youtube transcript indexed successfully");
+        return ResponseEntity.ok("YouTube transcript indexed successfully");
     }
 
 }
