@@ -2,43 +2,223 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ResearchFlow</title>
     <link rel="stylesheet" href="sidepanel.css">
 </head>
+
 <body>
-    <div class="container">
-        <div class="head">
-            <div class="title-section">
-                <h2>ResearchFlow</h2>
-                <p class="tagline">AI Powered Research Assistant</p>
-            </div>
 
-            <div class="theme-wrapper">
-                <button id="themeToggle">🌙</button>
-                <span class="tooltip">Switch to Dark Mode</span>
+<div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+
+        <div class="brand">
+            <img src="idea.png" alt="ResearchFlow logo" class="brand-icon" />
+
+            <div>
+                <h1>ResearchFlow</h1>
+                <p>AI Powered Research Assistant</p>
             </div>
         </div>
-        <p class="description">
-            Select text on a webpage and choose an action below.
-        </p>
+
+        <button
+                id="themeToggle"
+                class="icon-button"
+                title="Switch to Dark Mode"
+                aria-label="Toggle theme">
+            🌙
+        </button>
+
+    </header>
+
+
+    <!-- RESEARCH SECTION -->
+    <section class="section">
+
+        <div class="section-header">
+            <div>
+                <h2>Research</h2>
+                <p>Select text from the webpage and choose an action.</p>
+            </div>
+        </div>
+
+
+        <!-- ACTIONS -->
         <div class="actions">
-            <button id="summarizeBtn">Summarize</button>
-            <button id="explainBtn">Explain</button>
-            <button id="suggestBtn">Suggest</button>
-            <button id="keyPointsBtn">Key Points</button>
-            <button id="notesBtn">Generate Notes</button>
+
+            <button
+                    id="summarizeBtn"
+                    class="action-button">
+                <span class="action-icon">✦</span>
+                <span>
+                    <strong>Summarize</strong>
+                    <small>Get the key ideas</small>
+                </span>
+            </button>
+
+            <button
+                    id="explainBtn"
+                    class="action-button">
+                <span class="action-icon">?</span>
+                <span>
+                    <strong>Explain</strong>
+                    <small>Understand the concept</small>
+                </span>
+            </button>
+
+            <button
+                    id="keyPointsBtn"
+                    class="action-button">
+                <span class="action-icon">☷</span>
+                <span>
+                    <strong>Key Points</strong>
+                    <small>Extract important points</small>
+                </span>
+            </button>
+
+            <button
+                    id="suggestBtn"
+                    class="action-button">
+                <span class="action-icon">💡</span>
+                <span>
+                    <strong>Suggest</strong>
+                    <small>Get useful suggestions</small>
+                </span>
+            </button>
+
+            <button
+                    id="notesBtn"
+                    class="action-button">
+                <span class="action-icon">📝</span>
+                <span>
+                    <strong>Generate Notes</strong>
+                    <small>Create structured notes</small>
+                </span>
+            </button>
+
         </div>
 
-        <div class="notes">
-            <h3>Research Notes</h3>
-            <textarea id="notes" placeholder="Take notes here"></textarea>
-            <button id="saveNotesBtn">Save Notes</button>
-        </div>
+    </section>
 
-        <div id="results"></div>
+    <!-- YOUTUBE RESEARCH -->
+<section class="section youtube-section">
+
+    <div class="section-header">
+        <div>
+            <h2>YouTube Research</h2>
+            <p>Analyze a video and ask questions about its content.</p>
+        </div>
     </div>
 
-    <script src="sidepanel.js"></script>
-    
+    <div class="youtube-input-wrapper">
+
+        <input
+                type="text"
+                id="youtubeUrl"
+                placeholder="Paste YouTube URL..."
+                autocomplete="off">
+
+        <button
+                id="indexYoutubeBtn"
+                class="youtube-button">
+            Analyze
+        </button>
+
+    </div>
+
+<div id="youtubeStatus" class="youtube-status" aria-live="polite" aria-atomic="true"></div>
+
+    <div
+            id="youtubeQuestionSection"
+            class="youtube-question-section hidden">
+
+        <div class="video-status">
+            <span class="status-dot"></span>
+            <span>Video indexed and ready for questions</span>
+        </div>
+
+        <div class="question-input-wrapper">
+
+            <textarea
+                    id="youtubeQuestion"
+                    placeholder="Ask something about this video..."
+                    rows="2"></textarea>
+
+            <button
+                    id="askYoutubeBtn"
+                    class="ask-button">
+                Ask
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+    <!-- RESULT SECTION -->
+    <section class="section result-section">
+
+        <div class="section-title-row">
+            <h2>AI Response</h2>
+
+            <button
+                    id="copyResultBtn"
+                    class="small-button"
+                    title="Copy response">
+                Copy
+            </button>
+        </div>
+
+        <div id="results" class="results empty-state" aria-live="polite" aria-atomic="true">
+
+            <div class="empty-icon">✦</div>
+
+            <h3>No response yet</h3>
+
+            <p>
+                Select text from a webpage and choose an action
+                to start researching.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- NOTES SECTION -->
+    <section class="section notes-section">
+
+        <div class="section-title-row">
+
+            <div>
+                <h2>Research Notes</h2>
+                <p>Keep useful information for later.</p>
+            </div>
+
+            <button
+                    id="saveNotesBtn"
+                    class="small-button primary">
+                Save
+            </button>
+
+        </div>
+
+        <textarea
+                id="notes"
+                placeholder="Write your research notes here..."></textarea>
+
+        <div id="saveStatus" class="save-status" aria-live="polite" aria-atomic="true"></div>
+
+    </section>
+
+</div>
+
+<script src="shared-helpers.js"></script>
+<script src="sidepanel.js"></script>
+
 </body>
 </html>
