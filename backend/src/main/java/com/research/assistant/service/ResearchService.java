@@ -1,65 +1,35 @@
 package com.research.assistant.service;
 
-import com.research.assistant.dto.GeminiResponse;
+
+
 import com.research.assistant.dto.ResearchRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import tools.jackson.databind.ObjectMapper;
 
-import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ResearchService {
 
-    @Value("${gemini.api.url}")
-    private String geminiApiUrl;
+    @Value("${spring.ai.ollama.base-url}")
+    private String ollamaApi;
 
-    @Value("${gemini.api.key}")
-    private String geminiApiKey;
+    private final ChatModel chatModel;
 
-    private final WebClient webClient;
-    private final ObjectMapper objectMapper;
-
-    public ResearchService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
-        this.webClient = webClientBuilder.build();
-        this.objectMapper = objectMapper;
-    }
 
     public String processContent(ResearchRequest request) {
-        String prompt = buildPrompt(request);
+        String promptText = buildPrompt(request);
 
-        Map<String ,Object> requestBody = Map.of(
-                "contents", new Object[]{
-                        Map.of("parts", new Object[]{
-                                Map.of("text",prompt)
-                        })
-                }
-        );
+        Prompt prompt = new Prompt(promptText);
 
-        String response = webClient.post()
-                .uri(geminiApiUrl+geminiApiKey)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-        return extractTextFromResponse(response);
-    }
-
-    private String extractTextFromResponse(String response) {
-        try{
-            GeminiResponse geminiResponse = objectMapper.readValue(response,GeminiResponse.class);
-            if(geminiResponse.getCandidates() != null && !geminiResponse.getCandidates().isEmpty()){
-                GeminiResponse.Candidate firstCandidate = geminiResponse.getCandidates().getFirst();
-                if(firstCandidate.getContent() != null && firstCandidate.getContent().getParts() != null && !firstCandidate.getContent().getParts().isEmpty()){
-                    return firstCandidate.getContent().getParts().getFirst().getText();
-                }
-            }
-            return "No content fount in response";
-        }catch (Exception e){
-            return "Error Parsing: "+ e.getMessage();
-        }
+        return chatModel
+                .call(prompt)
+                .getResult()
+                .getOutput()
+                .getText();
 
     }
 
